@@ -1,0 +1,19 @@
+name: MISC
+
+on:
+  push:
+  pull_request:
+    types:
+      - opened
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run a one-line script
+        env:
+          PR_NUMBER: ${{ github.event.number }}      
+        run: echo ${PR_NUMBER}
