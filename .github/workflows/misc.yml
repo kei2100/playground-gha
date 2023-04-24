@@ -16,4 +16,4 @@ jobs:
       - name: echo PR number
         env:
           PR_NUMBER: ${{ github.event.number }}      
-        run: echo "PR_NUMBER: ${PR_NUMBER}"
+        run: echo "PR_NUMBER:${PR_NUMBER}"
