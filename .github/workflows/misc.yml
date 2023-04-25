@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Run a one-line script
+      - name: echo PR_NUMBER
         env:
           PR_NUMBER: ${{ github.event.number }}      
-        run: echo ${PR_NUMBER}
+        run: echo "PR_NUMBER:${PR_NUMBER}"
