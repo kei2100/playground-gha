@@ -10,12 +10,19 @@ jobs:
     outputs:
       output1: ${{ steps.step1.outputs.test }}
       output2: ${{ steps.step2.outputs.test }}
-      output3: ${{ steps.step1.outputs }}
+      output3_token: ${{ steps.step3.outputs.token }}
+      output3_domain: ${{ steps.step3.outputs.domain }}
     steps:
       - id: step1
         run: echo "test=hello" >> "$GITHUB_OUTPUT"
       - id: step2
         run: echo "test=world" >> "$GITHUB_OUTPUT"
+      - id: step3
+        run: |
+          {
+            "token=production"
+            "domain=example.com"
+          } >> $GITHUB_OUTPUT
   job2:
     runs-on: ubuntu-latest
     needs: job1
@@ -25,4 +32,4 @@ jobs:
           OUTPUT2: ${{needs.job1.outputs.output2}}
         run: |
           echo "$OUTPUT1 $OUTPUT2"
-          echo "${{needs.job1.outputs.output3}}"
+          echo "${{needs.job1.outputs.output3_token}} ${{needs.job1.outputs.output3_domain}}"
