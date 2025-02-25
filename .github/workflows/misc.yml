@@ -1,10 +1,11 @@
 name: MISC
 
 on:
-  push:
-  pull_request:
-    types:
-      - opened
+#  push:
+#  pull_request:
+#    types:
+#      - opened
+  workflow_dispatch:
     
 jobs:
   build:
