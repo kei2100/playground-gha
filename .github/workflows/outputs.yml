@@ -19,10 +19,8 @@ jobs:
         run: echo "test=world" >> "$GITHUB_OUTPUT"
       - id: step3
         run: |
-          echo '{
-            "token=production"
-            "domain=example.com"
-          }' >> $GITHUB_OUTPUT
+          echo "token=production" >> $GITHUB_OUTPUT
+          echo "domain=example.com" >> $GITHUB_OUTPUT
   job2:
     runs-on: ubuntu-latest
     needs: job1
