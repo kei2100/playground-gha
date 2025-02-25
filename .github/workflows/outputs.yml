@@ -19,7 +19,7 @@ jobs:
         run: echo "test=world" >> "$GITHUB_OUTPUT"
       - id: step3
         run: |
-          {
+          echo {
             "token=production"
             "domain=example.com"
           } >> $GITHUB_OUTPUT
