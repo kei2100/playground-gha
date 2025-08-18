@@ -1,0 +1,74 @@
+name: Auto-update migration files
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'migrations/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-migration-timestamps:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Git config
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Get latest migration timestamp from main
+        id: main-timestamp
+        run: |
+          git fetch origin main
+          LATEST_MAIN_FILE=$(git ls-tree -r --name-only origin/main -- migrations/ | grep -E "^migrations/v[0-9]{14}\.sql$" | sort -r | head -n1)
+          if [ -n "$LATEST_MAIN_FILE" ]; then
+            LATEST_TIMESTAMP=$(basename "$LATEST_MAIN_FILE" .sql | sed 's/^v//')
+            echo "timestamp=$LATEST_TIMESTAMP" >> $GITHUB_OUTPUT
+            echo "Latest migration in main: $LATEST_TIMESTAMP"
+          else
+            echo "timestamp=00000000000000" >> $GITHUB_OUTPUT
+            echo "No migrations found in main branch"
+          fi
+
+      - name: Update migration file timestamps
+        id: update-files
+        run: |
+          MAIN_TIMESTAMP="${{ steps.main-timestamp.outputs.timestamp }}"
+          UPDATED=false
+          
+          for file in migrations/v[0-9]*.sql; do
+            if [ -f "$file" ]; then
+              # Extract current timestamp from filename
+              CURRENT_TIMESTAMP=$(basename "$file" .sql | sed 's/^v//')
+              
+              # Check if current timestamp is older than or equal to main's latest
+              if [ "$CURRENT_TIMESTAMP" -le "$MAIN_TIMESTAMP" ]; then
+                # Generate new timestamp (current time)
+                NEW_TIMESTAMP=$(date -u +"%Y%m%d%H%M%S")
+                NEW_FILE="migrations/v${NEW_TIMESTAMP}.sql"
+                
+                echo "Updating $file -> $NEW_FILE"
+                git mv "$file" "$NEW_FILE"
+                UPDATED=true
+              fi
+            fi
+          done
+          
+          echo "updated=$UPDATED" >> $GITHUB_OUTPUT
+
+      - name: Commit and push changes
+        if: steps.update-files.outputs.updated == 'true'
+        run: |
+          git add .
+          git commit -m "Auto-update migration timestamps"
+          git push origin HEAD
