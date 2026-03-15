@@ -3,6 +3,8 @@ name: concurrency
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
+    paths:
+      - '.github/workflows/concurrency.yml'
 
 # 追いコミット入ったら実行中のワークフローをキャンセルして最新のコミットでやり直す設定
 concurrency:
